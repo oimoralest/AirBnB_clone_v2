@@ -10,6 +10,7 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+from shlex import split
 
 
 class HBNBCommand(cmd.Cmd):
@@ -118,13 +119,27 @@ class HBNBCommand(cmd.Cmd):
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+        else:
+            className = split(args)[0]
+            if className in HBNBCommand.classes:
+                newInstance = HBNBCommand.classes[className]()
+            else:
+                print("** class doesn't exist **")
+                return
+            if len(split(args)) > 2:
+                parameters = split(args)[1:]
+                for parameter in parameters:
+                    key, value = parameter.split("=", maxsplit=1)
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        try:
+                            value = float(value)
+                        except ValueError:
+                            value = value.replace("_", " ")
+                    setattr(newInstance, key, value)
+            storage.save()
+            print(newInstance.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -319,6 +334,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
