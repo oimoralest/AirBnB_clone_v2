@@ -126,10 +126,11 @@ class HBNBCommand(cmd.Cmd):
             else:
                 print("** class doesn't exist **")
                 return
-            if len(split(args)) > 2:
+            if len(split(args)) > 1:
                 parameters = split(args)[1:]
                 for parameter in parameters:
                     key, value = parameter.split("=", maxsplit=1)
+                    print(type(value))
                     try:
                         value = int(value)
                     except ValueError:
