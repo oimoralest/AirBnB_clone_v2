@@ -30,7 +30,7 @@ class Place(BaseModel, Base):
     amenity_ids = []
     reviews = relationship("Review", backref="place")
     amenities = relationship("Amenity", secondary=place_amenity,
-                             viewonly=False, back_populates="place_amenities")
+                             viewonly=False)
     if getenv("HBNB_TYPE_STORAGE") == "file":
         @property
         def reviews(self):
