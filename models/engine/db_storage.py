@@ -1,16 +1,16 @@
 #!/usr/bin/python3
 """ Defines The DBStorage engine"""
-from os import getenv
-from models.base_model import Base
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from models.base_model import BaseModel
-from models.user import User
-from models.place import Place
-from models.state import State
-from models.city import City
+import models
 from models.amenity import Amenity
+from models.base_model import BaseModel, Base
+from models.city import City
+from models.place import Place
 from models.review import Review
+from models.state import State
+from models.user import User
+from os import getenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 class DBStorage:
@@ -22,28 +22,30 @@ class DBStorage:
         """ Initialize a DBStorage instance"""
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
             getenv("HBNB_MYSQL_USER"), getenv("HBNB_MYSQL_PWD"),
-            getenv("HBNB_MYSQL_HOST"), getenv("HBNB_MYSQL_DB"),
-	        pool_pre_ping=True
-        ))
+            getenv("HBNB_MYSQL_HOST"), getenv("HBNB_MYSQL_DB")),
+            pool_pre_ping=True)
         if getenv("HBNB_ENV") == "test":
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
         """Queries on the current database session"""
         objectsDict = dict()
-        if cls == None:
-            query = self.__session.query(
-                User, State, City, Amenity, Place, Review).all()
-            for listObjects in query:
-                for object_ in listObjects:
-                    className = object_.__class__
-                    id_ = object_.id
-                    classId = className + "." + id_
-                    objectsDict[classId] = object_
+        if cls is None:
+            listClasses = [Amenity, City, Place, State, Review, User]
+            for class_ in listClasses:
+                try:
+                    query = self.__session.query(class_).all()
+                    for object_ in query:
+                        className = object_.to_dict()['__class__']
+                        id_ = object_.id
+                        classId = className + "." + id_
+                        objectsDict[classId] = object_
+                except Exception:
+                    pass
         else:
             query = self.__session.query(cls).all()
             for object_ in query:
-                className = object_.__class__
+                className = object_.to_dict()['__class__']
                 id_ = object_.id
                 classId = className + "." + id_
                 objectsDict[classId] = object_
@@ -66,6 +68,6 @@ class DBStorage:
         """Create all tables in the database and initialize a new session"""
         Base.metadata.create_all(self.__engine)
         session_factory = sessionmaker(bind=self.__engine,
-			       expire_on_commit=False)
+                                       expire_on_commit=False)
         Session = scoped_session(session_factory)
         self.__session = Session()

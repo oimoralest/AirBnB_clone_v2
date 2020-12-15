@@ -11,6 +11,7 @@ from models.city import City
 from models.amenity import Amenity
 from models.review import Review
 from shlex import split
+from os import getenv
 
 
 class HBNBCommand(cmd.Cmd):
@@ -74,7 +75,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] is '{' and pline[-1] is '}'\
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -115,7 +116,7 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class"""
+        """ Create an object of any class with parameters"""
         if not args:
             print("** class name missing **")
             return
@@ -130,7 +131,6 @@ class HBNBCommand(cmd.Cmd):
                 parameters = split(args)[1:]
                 for parameter in parameters:
                     key, value = parameter.split("=", maxsplit=1)
-                    print(type(value))
                     try:
                         value = int(value)
                     except ValueError:
@@ -139,7 +139,8 @@ class HBNBCommand(cmd.Cmd):
                         except ValueError:
                             value = value.replace("_", " ")
                     setattr(newInstance, key, value)
-            storage.save()
+            newInstance.to_dict()
+            newInstance.save()
             print(newInstance.id)
 
     def help_create(self):
@@ -216,19 +217,17 @@ class HBNBCommand(cmd.Cmd):
     def do_all(self, args):
         """ Shows all objects, or all objects of a class"""
         print_list = []
-
         if args:
             args = args.split(' ')[0]  # remove possible trailing args
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all().items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all().items():
                 print_list.append(str(v))
-
         print(print_list)
 
     def help_all(self):
@@ -239,7 +238,7 @@ class HBNBCommand(cmd.Cmd):
     def do_count(self, args):
         """Count current number of class instances"""
         count = 0
-        for k, v in storage._FileStorage__objects.items():
+        for k, v in storage.all().items():
             if args == k.split('.')[0]:
                 count += 1
         print(count)
