@@ -59,5 +59,5 @@ class Place(BaseModel, Base):
             """handles append method for adding an Amenity.id to the attribute
             amenity_ids"""
             from models.amenity import Amenity
-            if isinstance(obj, Amenity):
+            if isinstance(obj, type(Amenity)):
                 self.amenity_ids.append(obj.id)
