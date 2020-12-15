@@ -9,9 +9,10 @@ from sqlalchemy.sql.schema import Table
 from models.review import Review
 place_amenity = Table(
     'place_amenity', Base.metadata,
-    Column('place_id', String(60), ForeignKey("places.id"), nullable=True),
+    Column('place_id', String(60), ForeignKey("places.id"), nullable=True,
+           primary_key=True),
     Column('amenity_id', String(60), ForeignKey("amenities.id"),
-           nullable=True))
+           nullable=True), primary_key=True)
 
 
 class Place(BaseModel, Base):
@@ -30,7 +31,7 @@ class Place(BaseModel, Base):
     amenity_ids = []
     reviews = relationship("Review", backref="place")
     amenities = relationship("Amenity", secondary=place_amenity,
-                             viewonly=False)
+                             viewonly=False, backref="places_amenities")
     if getenv("HBNB_TYPE_STORAGE") == "file":
         @property
         def reviews(self):
