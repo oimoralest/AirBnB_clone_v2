@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 """ """
-from models.base_model import BaseModel
+from models.base_model import Base, BaseModel
 import unittest
 import datetime
 from uuid import UUID
 import json
+from os import getenv
 import os
 
 
@@ -22,6 +23,7 @@ class test_basemodel(unittest.TestCase):
         pass
 
     def tearDown(self):
+        """ """
         try:
             os.remove('file.json')
         except:
@@ -47,7 +49,8 @@ class test_basemodel(unittest.TestCase):
         with self.assertRaises(TypeError):
             new = BaseModel(**copy)
 
-    def test_save(self):
+    @unittest.skipIf(getenv('HBNB_TYPE_STORAGE') == 'db', "not supported")
+    def test_save_file(self):
         """ Testing save """
         i = self.value()
         i.save()
@@ -57,41 +60,41 @@ class test_basemodel(unittest.TestCase):
             self.assertEqual(j[key], i.to_dict())
 
     def test_str(self):
-        """ """
+        """check str"""
         i = self.value()
         self.assertEqual(str(i), '[{}] ({}) {}'.format(self.name, i.id,
                          i.__dict__))
 
     def test_todict(self):
-        """ """
+        """check to dict"""
         i = self.value()
         n = i.to_dict()
         self.assertEqual(i.to_dict(), n)
 
     def test_kwargs_none(self):
-        """ """
+        """checking kwargs is none"""
         n = {None: None}
         with self.assertRaises(TypeError):
             new = self.value(**n)
 
     def test_kwargs_one(self):
-        """ """
+        """check kwargs as one"""
         n = {'Name': 'test'}
-        with self.assertRaises(KeyError):
-            new = self.value(**n)
+        new = self.value(**n)
+        self.assertEqual(type(new), self.value)
 
     def test_id(self):
-        """ """
+        """check id"""
         new = self.value()
         self.assertEqual(type(new.id), str)
 
     def test_created_at(self):
-        """ """
+        """ Tests created_at argument"""
         new = self.value()
         self.assertEqual(type(new.created_at), datetime.datetime)
 
     def test_updated_at(self):
-        """ """
+        """ Tests updated_at argument"""
         new = self.value()
         self.assertEqual(type(new.updated_at), datetime.datetime)
         n = new.to_dict()

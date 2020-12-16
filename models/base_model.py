@@ -29,7 +29,11 @@ class BaseModel:
                 kwargs['created_at'] = datetime.strptime(
                     kwargs['created_at'], '%Y-%m-%dT%H:%M:%S.%f')
             except Exception:
-                self.__init__()
+                if 'id' not in kwargs.keys():
+                    self.__init__()
+                else:
+                    self.created_at = datetime.now()
+                    self.updated_at = datetime.now()
             try:
                 del kwargs['__class__']
             except Exception:
