@@ -11,10 +11,10 @@ place_amenity = Table(
     'place_amenity', Base.metadata,
     Column(
         'place_id', String(60), ForeignKey("places.id"),
-        primary_key=True, nullable=True),
+        primary_key=True, nullable=False),
     Column(
         'amenity_id', String(60), ForeignKey("amenities.id"),
-        primary_key=True, nullable=True))
+        primary_key=True, nullable=False))
 
 
 class Place(BaseModel, Base):
@@ -32,8 +32,8 @@ class Place(BaseModel, Base):
     longitude = Column(Float, nullable=True)
     amenity_ids = []
     reviews = relationship("Review", backref="place")
-    amenities = relationship("Amenity", secondary=place_amenity,
-                             viewonly=False)
+    amenities = relationship(
+        "Amenity", secondary=place_amenity, viewonly=False)
     if getenv("HBNB_TYPE_STORAGE") == "file":
         @property
         def reviews(self):
@@ -50,7 +50,8 @@ class Place(BaseModel, Base):
             """that returns the list of Amenity instances based on the
             attribute amenity_ids that contains all Amenity.id linked to the
             Place"""
-            amenities = models.storage.all(Review)
+            from models.amenity import Amenity
+            amenities = models.storage.all(Amenity)
             listAmenities = []
             for classId, amenity in amenities.items():
                 if amenity.place_id == self.id:
