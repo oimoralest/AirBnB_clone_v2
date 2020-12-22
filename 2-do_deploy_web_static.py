@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Fabric script"""
 from fabric.api import put, run, env
+from os.path import exists
 env.user = 'ubuntu'
 env.hosts = ['34.75.154.27', '34.75.211.153']
 
@@ -8,6 +9,8 @@ env.hosts = ['34.75.154.27', '34.75.211.153']
 def do_deploy(archive_path):
     """Deploy new static content"""
     try:
+        if not exists(archive_path):
+            raise
         upload = put(archive_path, "/tmp/")
         name = upload[0].split("/")[2].split(".")[0]
         run("mkdir -p /data/web_static/releases/{}".format(name))
