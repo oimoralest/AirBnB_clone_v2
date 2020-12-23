@@ -16,6 +16,5 @@ exec { 'configuration':
 }
 service { 'nginx':
   ensure  => running,
-  enable  => true,
   require => package['nginx']
 }
