@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """This script starts a flask web application
 """
 from flask import Flask
